@@ -69,7 +69,7 @@
     <div id="video-screen" class="screen hidden flex items-center justify-center">
         <div class="bg-white/70 p-6 sm:p-8 rounded-2xl shadow-xl max-w-3xl w-full text-center">
             <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-sky-800">Vamos aprender!</h2>
-            <p class="text-base sm:text-lg text-sky-700 mt-2 mb-2">Assista ao vídeo para revisar e ganhar até 100 pontos!</p>
+            <p class="text-base sm:text-lg text-sky-700 mt-2 mb-2">Assista ao vídeo para revisar e ganhar até 200 pontos!</p>
             <div class="mb-4 bg-white/50 rounded-full px-6 py-2 inline-block">
                 <span class="text-2xl font-semibold text-sky-800">Pontos: <span class="score-display">0</span></span>
             </div>
@@ -353,7 +353,8 @@
                     } else {
                         scoreTextEl.classList.remove('text-red-500');
                         if (duration > 0) {
-                            score = Math.floor((maxWatchedTime / duration) * 100);
+                            const potentialScore = (maxWatchedTime / duration) * 200;
+                            score = Math.floor(potentialScore / 10) * 10;
                         }
                     }
                     updateScoreDisplay();
@@ -421,9 +422,9 @@
         }
         
         function getMotivationalMessage(finalScore) {
-            if (finalScore >= 150) {
+            if (finalScore >= 250) { // Ajustado para a nova pontuação máxima
                 return "Excelente, " + loggedInUser.firstName + "! Você é um mestre dos advérbios! 🏆";
-            } else if (finalScore >= 100) {
+            } else if (finalScore >= 150) { // Ajustado
                 return "Muito bem, " + loggedInUser.firstName + "! Continue praticando para ficar ainda melhor. 👍";
             } else {
                 return "Não desista, " + loggedInUser.firstName + "! Cada tentativa é um passo para aprender mais. ✨";
