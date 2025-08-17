@@ -126,7 +126,7 @@
                 <div class="text-xl"><strong>Pontos:</strong> <span id="final-score">0</span></div>
                 <div class="text-xl"><strong>Tempo:</strong> <span id="final-time">0s</span></div>
             </div>
-            <h2 class="text-2xl sm:text-3xl font-bold text-sky-800 mt-6 mb-4">Ranking</h2>
+            <h2 class="text-2xl sm:text-3xl font-bold text-sky-800 mt-6 mb-4">Ranking (Top 100)</h2>
             <div class="overflow-y-auto h-64 bg-white/50 rounded-lg">
                 <table class="w-full text-left">
                     <thead class="bg-sky-200 sticky top-0">
@@ -134,7 +134,7 @@
                             <th class="p-2">#</th>
                             <th class="p-2">Nome</th>
                             <th class="p-2">Pontos</th>
-                            <th class="p-2">Tempo</th>
+                            <th class="p-2">Turma</th>
                         </tr>
                     </thead>
                     <tbody id="ranking-body">
@@ -465,7 +465,7 @@
                         <td class="p-2 font-bold">${index + 1}</td>
                         <td class="p-2">${entry.name}</td>
                         <td class="p-2">${entry.score}</td>
-                        <td class="p-2">${entry.time}s</td>
+                        <td class="p-2">${entry.turma}</td>
                     </tr>
                 `;
                 tbody.innerHTML += row;
