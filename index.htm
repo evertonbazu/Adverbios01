@@ -69,7 +69,7 @@
     <div id="video-screen" class="screen hidden flex items-center justify-center">
         <div class="bg-white/70 p-6 sm:p-8 rounded-2xl shadow-xl max-w-3xl w-full text-center">
             <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-sky-800">Vamos aprender!</h2>
-            <p class="text-base sm:text-lg text-sky-700 mt-2 mb-2">Assista ao vídeo para revisar e ganhar até 200 pontos!</p>
+            <p class="text-base sm:text-lg text-sky-700 mt-2 mb-2">Assista ao vídeo para revisar e ganhar até 1000 pontos!</p>
             <div class="mb-4 bg-white/50 rounded-full px-6 py-2 inline-block">
                 <span class="text-2xl font-semibold text-sky-800">Pontos: <span class="score-display">0</span></span>
             </div>
@@ -79,6 +79,7 @@
             <button id="continue-btn" class="mt-8 w-full bg-green-500 text-white text-2xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl shadow-lg transition transform hover:scale-105 opacity-50 cursor-not-allowed" disabled>
                 Ir para o Jogo!
             </button>
+            <button id="skip-video-btn" class="mt-2 text-gray-500 hover:text-gray-700 hover:underline">Pular vídeo (não ganha pontos)</button>
         </div>
     </div>
 
@@ -160,6 +161,7 @@
         const gameScreen = document.getElementById('game-screen');
         const endScreen = document.getElementById('end-screen');
         const continueBtn = document.getElementById('continue-btn');
+        const skipVideoBtn = document.getElementById('skip-video-btn');
         const loginForm = document.getElementById('login-form');
         const loginCodeInput = document.getElementById('login-code');
         const loginPasswordInput = document.getElementById('login-password');
@@ -353,7 +355,7 @@
                     } else {
                         scoreTextEl.classList.remove('text-red-500');
                         if (duration > 0) {
-                            const potentialScore = (maxWatchedTime / duration) * 200;
+                            const potentialScore = (maxWatchedTime / duration) * 1000;
                             score = Math.floor(potentialScore / 10) * 10;
                         }
                     }
@@ -376,6 +378,13 @@
                 showScreen(gameScreen);
                 startGame();
             }
+        });
+
+        skipVideoBtn.addEventListener('click', () => {
+            score = 0; // Zera a pontuação se o vídeo for pulado
+            updateScoreDisplay();
+            showScreen(gameScreen);
+            startGame();
         });
 
         const adverbs = [
@@ -422,9 +431,9 @@
         }
         
         function getMotivationalMessage(finalScore) {
-            if (finalScore >= 250) { // Ajustado para a nova pontuação máxima
+            if (finalScore >= 1100) {
                 return "Excelente, " + loggedInUser.firstName + "! Você é um mestre dos advérbios! 🏆";
-            } else if (finalScore >= 150) { // Ajustado
+            } else if (finalScore >= 700) {
                 return "Muito bem, " + loggedInUser.firstName + "! Continue praticando para ficar ainda melhor. 👍";
             } else {
                 return "Não desista, " + loggedInUser.firstName + "! Cada tentativa é um passo para aprender mais. ✨";
