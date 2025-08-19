@@ -42,7 +42,10 @@
                     <div class="loader hidden ml-3"></div>
                 </button>
                 <p id="login-message" class="text-red-500 mt-4 h-5"></p>
-                <button id="go-to-register" class="mt-2 text-sky-600 hover:underline">Não tenho cadastro</button>
+                <div class="flex space-x-2 mt-2">
+                    <button id="go-to-register" class="w-1/2 text-sky-600 hover:underline">Não tenho cadastro</button>
+                    <button id="view-ranking-button" class="w-1/2 text-sky-600 hover:underline">Ver Ranking</button>
+                </div>
             </div>
             <div id="register-form" class="hidden">
                 <h1 class="text-3xl sm:text-4xl font-bold text-sky-800">Criar Cadastro</h1>
@@ -121,11 +124,13 @@
     <!-- Tela Final (Game Over) -->
     <div id="end-screen" class="screen hidden flex items-center justify-center">
         <div class="bg-white/70 p-6 sm:p-8 rounded-2xl shadow-xl max-w-3xl w-full text-center">
-            <h1 class="text-3xl sm:text-4xl font-bold text-sky-800">Fim de Jogo!</h1>
-            <p id="final-message" class="text-lg text-sky-800 mt-4 font-semibold"></p>
-            <div class="flex justify-around items-center my-6 text-sky-700">
-                <div class="text-xl"><strong>Pontos:</strong> <span id="final-score">0</span></div>
-                <div class="text-xl"><strong>Tempo:</strong> <span id="final-time">0s</span></div>
+            <div id="end-screen-content">
+                <h1 class="text-3xl sm:text-4xl font-bold text-sky-800">Fim de Jogo!</h1>
+                <p id="final-message" class="text-lg text-sky-800 mt-4 font-semibold"></p>
+                <div class="flex justify-around items-center my-6 text-sky-700">
+                    <div class="text-xl"><strong>Pontos:</strong> <span id="final-score">0</span></div>
+                    <div class="text-xl"><strong>Tempo:</strong> <span id="final-time">0s</span></div>
+                </div>
             </div>
             <h2 class="text-2xl sm:text-3xl font-bold text-sky-800 mt-6 mb-4">Ranking (Top 100)</h2>
             <div class="overflow-y-auto h-64 bg-white/50 rounded-lg">
@@ -146,15 +151,18 @@
             <button id="play-again-button" class="mt-8 w-full bg-yellow-500 text-white text-2xl sm:text-3xl font-bold py-3 rounded-xl shadow-lg hover:bg-yellow-600 transition">
                 Jogar Novamente
             </button>
+            <button id="back-from-ranking-button" class="mt-8 w-full bg-gray-500 text-white text-2xl sm:text-3xl font-bold py-3 rounded-xl shadow-lg hover:bg-gray-600 transition hidden">
+                Voltar
+            </button>
         </div>
     </div>
 
-    <div id="feedback" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-6 sm:p-8 rounded-2xl text-white text-2xl sm:text-3xl font-bold shadow-2xl opacity-0 pointer-events-none w-11/12 max-w-sm text-center"></div>
+    <div id="feedback" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-6 sm:p-8 rounded-2xl text-white text-2xl font-bold shadow-2xl opacity-0 pointer-events-none w-11/12 max-w-sm text-center"></div>
     
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvzdtou17UCu8lmOFg9fxVEaLg1FnWcvexCYUZzqNLcUhiE6mZW_OkxeeI874AXZRT/exec';
-        const NOME_DESTE_JOGO = "Chuva de Advérbios"; // Nome do jogo para o ranking
+        const NOME_DESTE_JOGO = "Chuva de Advérbios";
 
         const loginScreen = document.getElementById('login-screen');
         const videoScreen = document.getElementById('video-screen');
@@ -179,12 +187,17 @@
         const livesContainer = document.getElementById('lives-container');
         const playerFirstNameEl = document.getElementById('player-firstname');
         const finalMessageEl = document.getElementById('final-message');
+        const viewRankingButton = document.getElementById('view-ranking-button');
+        const backFromRankingButton = document.getElementById('back-from-ranking-button');
+        const playAgainButton = document.getElementById('play-again-button');
+        const endScreenContent = document.getElementById('end-screen-content');
 
         let score = 0;
         let lives = 5;
-        let timerInterval;
         let startTime;
         let loggedInUser = null;
+        let isAnswering = false;
+        let videoPointsInvalidated = false;
 
         function showScreen(screenToShow) {
             [loginScreen, videoScreen, gameScreen, endScreen].forEach(screen => screen.classList.add('hidden'));
@@ -285,7 +298,6 @@
             registerMessage.textContent = '';
         });
 
-        // Event listeners for Enter key
         loginPasswordInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') loginButton.click(); });
         loginCodeInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') loginButton.click(); });
         registerPasswordInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') registerButton.click(); });
@@ -331,6 +343,7 @@
 
         function onPlayerReady(event) {
             maxWatchedTime = 0;
+            videoPointsInvalidated = false;
         }
 
         function onPlayerStateChange(event) {
@@ -350,14 +363,17 @@
                     }
                     
                     if (isMuted || playbackRate !== 1) {
-                        score = 0;
+                        videoPointsInvalidated = true;
                         scoreTextEl.classList.add('text-red-500');
                     } else {
                         scoreTextEl.classList.remove('text-red-500');
-                        if (duration > 0) {
-                            const potentialScore = (maxWatchedTime / duration) * 1000;
-                            score = Math.floor(potentialScore / 10) * 10;
-                        }
+                    }
+
+                    if(videoPointsInvalidated) {
+                        score = 0;
+                    } else if (duration > 0) {
+                        const potentialScore = (maxWatchedTime / duration) * 1000;
+                        score = Math.floor(potentialScore / 10) * 10;
                     }
                     updateScoreDisplay();
 
@@ -381,7 +397,7 @@
         });
 
         skipVideoBtn.addEventListener('click', () => {
-            score = 0; // Zera a pontuação se o vídeo for pulado
+            score = 0;
             updateScoreDisplay();
             showScreen(gameScreen);
             startGame();
@@ -393,6 +409,13 @@
             { word: 'bem', category: 'modo' }, { word: 'mal', category: 'modo' }, { word: 'devagar', category: 'modo' }, { word: 'rapidamente', category: 'modo' }, { word: 'calmamente', category: 'modo' },
             { word: 'muito', category: 'intensidade' }, { word: 'pouco', category: 'intensidade' }, { word: 'bastante', category: 'intensidade' }, { word: 'demais', category: 'intensidade' }, { word: 'mais', category: 'intensidade' }
         ];
+        
+        const categoryQuestions = {
+            tempo: "Quando?",
+            lugar: "Onde?",
+            modo: "Como?",
+            intensidade: "Quanto?"
+        };
 
         const currentAdverbEl = document.getElementById('current-adverb');
         const dropZones = document.querySelectorAll('.drop-zone');
@@ -400,15 +423,15 @@
         let currentAdverb = null;
         let availableAdverbs = [...adverbs];
 
-        function showFeedback(message, isCorrect) {
-            feedbackEl.textContent = message;
-            feedbackEl.className = `fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-6 sm:p-8 rounded-2xl text-white text-2xl sm:text-3xl font-bold shadow-2xl opacity-0 pointer-events-none w-11/12 max-w-sm text-center ${isCorrect ? 'bg-green-500' : 'bg-red-500'}`;
+        function showFeedback(title, explanation, isCorrect) {
+            feedbackEl.innerHTML = `<strong class="block text-3xl">${title}</strong><span class="text-xl mt-2 block">${explanation}</span>`;
+            feedbackEl.className = `fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-6 sm:p-8 rounded-2xl text-white text-2xl font-bold shadow-2xl opacity-0 pointer-events-none w-11/12 max-w-sm text-center ${isCorrect ? 'bg-green-500' : 'bg-red-500'}`;
             feedbackEl.classList.remove('opacity-0');
             feedbackEl.style.transform = 'translate(-50%, -50%) scale(1)';
             setTimeout(() => {
                 feedbackEl.style.transform = 'translate(-50%, -50%) scale(0.5)';
                 feedbackEl.classList.add('opacity-0');
-            }, 1000);
+            }, 2400);
         }
 
         function nextAdverb() {
@@ -419,6 +442,7 @@
             currentAdverb = availableAdverbs[randomIndex];
             availableAdverbs.splice(randomIndex, 1);
             currentAdverbEl.textContent = currentAdverb.word;
+            isAnswering = true;
         }
 
         function startGame() {
@@ -445,17 +469,20 @@
             const timeSpent = Math.round((endTime - startTime) / 1000);
             
             showScreen(endScreen);
+            endScreenContent.classList.remove('hidden');
+            playAgainButton.classList.remove('hidden');
+            backFromRankingButton.classList.add('hidden');
             document.getElementById('final-score').textContent = score;
             document.getElementById('final-time').textContent = `${timeSpent}s`;
             finalMessageEl.textContent = getMotivationalMessage(score);
             
             const result = await callAppsScript('saveScoreAndGetRanking', { 
-                fullName: loggedInUser.name, // Envia o nome completo
+                fullName: loggedInUser.name, 
                 turma: loggedInUser.turma, 
                 score: score, 
                 time: timeSpent,
                 nomeDoJogo: NOME_DESTE_JOGO,
-                code: loggedInUser.code // Envia o código único do jogador
+                code: loggedInUser.code
             });
             
             if (result.status === 'success') {
@@ -465,9 +492,33 @@
             }
         }
         
+        async function displayRanking() {
+            showScreen(endScreen);
+            endScreenContent.classList.add('hidden');
+            playAgainButton.classList.add('hidden');
+            backFromRankingButton.classList.remove('hidden');
+
+            const result = await callAppsScript('getRanking', { nomeDoJogo: NOME_DESTE_JOGO });
+            if (result.status === 'success') {
+                populateRankingTable(result.ranking);
+            } else {
+                document.getElementById('ranking-body').innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">${result.message}</td></tr>`;
+            }
+        }
+
+        viewRankingButton.addEventListener('click', displayRanking);
+        
+        backFromRankingButton.addEventListener('click', () => {
+            showScreen(loginScreen);
+        });
+
         function populateRankingTable(ranking) {
             const tbody = document.getElementById('ranking-body');
             tbody.innerHTML = '';
+            if(ranking.length === 0){
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center">Ainda não há pontuações. Seja o primeiro!</td></tr>`;
+                return;
+            }
             ranking.forEach((entry, index) => {
                 const row = `
                     <tr class="border-b border-sky-100">
@@ -487,18 +538,24 @@
 
         dropZones.forEach(zone => {
             zone.addEventListener('click', () => {
-                if (!currentAdverb) return; // Impede cliques antes do jogo começar
+                if (!currentAdverb || !isAnswering) return;
+                isAnswering = false;
 
-                if (currentAdverb.category === zone.id) {
+                const correctCategory = currentAdverb.category;
+                const question = categoryQuestions[correctCategory];
+                
+                if (correctCategory === zone.id) {
                     score += 10;
-                    showFeedback('Correto! 🎉', true);
-                    nextAdverb();
+                    showFeedback('Correto! 🎉', `"${currentAdverb.word}" responde à pergunta "${question}".`, true);
+                    setTimeout(nextAdverb, 2500);
                 } else {
                     lives--;
-                    showFeedback('Ops, tente de novo! 🤔', false);
+                    showFeedback('Ops! 🤔', `"${currentAdverb.word}" é um advérbio de ${correctCategory}, pois responde à pergunta "${question}".`, false);
                     if (lives <= 0) {
-                        endGame();
+                        setTimeout(endGame, 2500);
                         return;
+                    } else {
+                        setTimeout(nextAdverb, 2500);
                     }
                 }
                 updateScoreDisplay();
