@@ -431,7 +431,7 @@
             setTimeout(() => {
                 feedbackEl.style.transform = 'translate(-50%, -50%) scale(0.5)';
                 feedbackEl.classList.add('opacity-0');
-            }, 2400);
+            }, 3400);
         }
 
         function nextAdverb() {
@@ -456,7 +456,7 @@
         
         function getMotivationalMessage(finalScore) {
             if (finalScore >= 1100) {
-                return "Excelente, " + loggedInUser.firstName + "! Você é um mestre dos advérbios! 🏆";
+                return "Excelente, " + loggedInUser.firstName + "! Você é um mestre dos advérbios! �";
             } else if (finalScore >= 700) {
                 return "Muito bem, " + loggedInUser.firstName + "! Continue praticando para ficar ainda melhor. 👍";
             } else {
@@ -547,15 +547,15 @@
                 if (correctCategory === zone.id) {
                     score += 10;
                     showFeedback('Correto! 🎉', `"${currentAdverb.word}" responde à pergunta "${question}".`, true);
-                    setTimeout(nextAdverb, 2500);
+                    setTimeout(nextAdverb, 3500);
                 } else {
                     lives--;
                     showFeedback('Ops! 🤔', `"${currentAdverb.word}" é um advérbio de ${correctCategory}, pois responde à pergunta "${question}".`, false);
                     if (lives <= 0) {
-                        setTimeout(endGame, 2500);
+                        setTimeout(endGame, 3500);
                         return;
                     } else {
-                        setTimeout(nextAdverb, 2500);
+                        setTimeout(nextAdverb, 3500);
                     }
                 }
                 updateScoreDisplay();
@@ -566,3 +566,4 @@
     </script>
 </body>
 </html>
+�
